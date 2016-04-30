@@ -3,17 +3,36 @@ const Dawg = require('../dawg').default;
 const assert = require('chai').assert;
 
 describe('values', () => {
-    it('Empty dag should have no values', () => {
+    it('Empty DAWG should have no values', () => {
         assert.deepEqual([], Array.from(Dawg.from([]).values()));
         assert.deepEqual([], Array.from(new Dawg().values()));
+        
+        assert.deepEqual([], Array.from(new Dawg()));
+        assert.deepEqual([], Array.from(Dawg.from()));
     });
 
-    it('Single dag should have one value', () => {
+    it('Single DAWG should have one value', () => {
         assert.deepEqual(['a'], Array.from(Dawg.from(['a']).values()));
+        assert.deepEqual(['a'], Array.from(Dawg.from(['a']).values('x')));
+
+        assert.deepEqual(['a'], Array.from(Dawg.from(['a'])));
     });
-    it('Single dag should have one value', () => {
-        assert.deepEqual(['a', 'b', 'c'], Array.from(Dawg.from(['a', 'b', 'c']).values()));
-        assert.deepEqual(['a', 'ab', 'b', 'ba', 'bace', 'c'], Array.from(Dawg.from(['a', 'ab', 'b', 'ba', 'bace', 'c']).values()));
+    
+    it('should join on path values using joiner', () => {
+        assert.deepEqual(
+            ['axbxc', 'bxcxa', 'cxaxb'],
+            Array.from(Dawg.from(['abc', 'bca', 'cab']).values('x')));
+            
+          assert.deepEqual(
+            ['axbxc', 'bcxa', 'cab'],
+            Array.from(Dawg.from(['abc', ['bc', 'a'], ['cab']]).values('x')));
+    });
+    
+      it('should accept a custom join function', () => {
+        assert.deepEqual(
+            ['aabbcc', 'bbccaa', 'ccaabb'],
+            Array.from(Dawg.from(['abc', 'bca', 'cab']).values((acc, x) => (acc ? acc + x : x) + x)));
+            
     });
 });
 

@@ -3,10 +3,13 @@ const Dawg = require('../dawg').default;
 const assert = require('chai').assert;
 
 describe('count', () => {
-    it('Empty dag should have no entries', () => {
+    it('Empty DAWG should have no entries', () => {
         assert.strictEqual(0, Dawg.from([]).count());
         assert.strictEqual(0, Dawg.from().count());
         assert.strictEqual(0, new Dawg().count());
+        
+        assert.strictEqual(false, new Dawg().has('a'));
+
     });
 
     it('Insert empty is noop', () => {
