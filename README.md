@@ -15,7 +15,9 @@ A DAWG stores a set of strings of letters in a graph, reusing nodes where possib
 
 When constructing the DAWG, you must insert items in [lexicographic order][lex]. For simple strings, this is just dictionary order. You can `.sort()` a Javascript array to put it in lexicographic order if you are not sure. 
 
-### `new Dawg(stringIterator, options)`
+-----
+
+#### `new Dawg(stringIterator, options)`
 Top level DAWG class.
 
 * `stringIterator` - Optional iterator of strings used to populate initial set. Strings must be in [lexicographic order][lex].
@@ -31,10 +33,14 @@ const basic_string_dawg = new Dawg([
     ['bull', 'terrier']]);
 ```
 
-### `Dawg.from(stringIterator, options)`
+-----
+
+#### `Dawg.from(stringIterator, options)`
 Same as `new Dawg(stringIterator, options)`, but freezes the dawg before returning. See `Dawg.prototype.freeze`
 
-### `Dawg.prototype.count()`
+-----
+
+#### `Dawg.prototype.count()`
 Get the number of entries stored in the DAWG. DAWGs cannot contain duplicate entires.
 
 ```js
@@ -48,7 +54,9 @@ new Dawg([
 ).count() === 2
 ```
 
-### `Dawg.prototype.add(string)`
+-----
+
+#### `Dawg.prototype.add(string)`
 Add a string to the DAWG. Returns the DAWG.
 
 `add` must be called in lexicographic order. If you fail to do so, an error is thrown. You cannot update a frozen DAWG.
@@ -78,7 +86,9 @@ const set = Dawg.from([])
 set.add('collie') === throws since `set` is frozen by `from`.
 ```
 
-### `Dawg.prototype.freeze()`
+-----
+
+#### `Dawg.prototype.freeze()`
 Locks the DAWG and prevents further mutation. Once you are done mutating the DAWG, freezing it can free up some memory.
 
 `Dawg.from` automatically freezes its result.
@@ -93,7 +103,9 @@ d.has('collie') === true
 d.add('lab') === throws since graph is frozen now
 ```
 
-### `Dawg.prototype.has(string)`
+-----
+
+#### `Dawg.prototype.has(string)`
 Does the set contain an entry for `string`?
 
 ```js
@@ -106,7 +118,9 @@ d.has('mastiff') === false
 d.has('PULI') === false
 ```
 
-### `Dawg.prototype.match(string)`
+-----
+
+#### `Dawg.prototype.match(string)`
 Finds the longest string in the DAWG that is part of `string`. The result will be between 0 `string.length` long. Only matches complete words in the DAWG.
 
 ```js
@@ -120,7 +134,9 @@ d.match('abcdx') === 'abc'
 d.match('abcdefg') === 'abcde'
 ```
 
-### `Dawg.prototype.longest(string)`
+-----
+
+#### `Dawg.prototype.longest(string)`
 Same behavior as `match`, but returns the length of the longest match instead of the match itself.
 
 One use of this is to get the matched vs unmatched parts of the input string:
@@ -137,7 +153,9 @@ matched === 'abc'
 unmatched === 'dx'
 ```
 
-### `Dawg.prototype.values(joiner = '')` `Dawg.prototype[Symbol.iterator]`
+-----
+
+#### `Dawg.prototype.values(joiner = '')` `Dawg.prototype[Symbol.iterator]`
 Get an iterator to all strings in the dawg.
 
 - `joiner` - Optional. String or function used to join the letters of the strings together. If a string, this is inserted between each letter. If this is a function, it is invoked with the left and right parts of the string to join and must return a string. 
@@ -160,7 +178,9 @@ Array.from(wd.values()) === Array.from(wd) === ['bulldog', 'bullterrier']
 Array.from(wd.values(' ')) === ['bull dog', 'bull terrier']
 ```
 
-### `Dawg.prototype.paths()`
+-----
+
+#### `Dawg.prototype.paths()`
 Get an iterator to all letter paths in the dawg.
 
 Unlike `values()`, this returns arrays of characters.
@@ -178,7 +198,9 @@ const wd = Dawg.from([
 Array.from(wd.paths()) === [['bull', 'dog'], ['bull', 'terrier']];
 ```
 
-### `Dawg.prototype.valuesStartingWith(string, joiner = '')`
+-----
+
+#### `Dawg.prototype.valuesStartingWith(string, joiner = '')`
 Same basic behavior as `values()` but only returns values that start with `string`. `string` itself does not have to be in the set.
 
 ```js
