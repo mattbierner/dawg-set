@@ -4,7 +4,7 @@
   "description": "Javascript directed acyclic word graph (DAWG)",
   "main": "dawg.js",
   "scripts": {
-    "test": "mocha tests"
+    "test": "./node_modules/.bin/mocha tests"
   },
   "repository": {
     "type": "git",
