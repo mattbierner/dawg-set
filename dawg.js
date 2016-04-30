@@ -17,17 +17,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var slice = Array.prototype.slice;
 
+var concat = function concat(a, b) {
+    return a.concat(b);
+};
+
 var join = function join(joiner) {
     return typeof joiner === 'function' ? joiner : function (acc, current) {
         return (acc === null ? '' : acc + joiner) + current;
-    };
-};
-
-var createEmptyNode = function createEmptyNode(id) {
-    return {
-        edges: new Map(),
-        final: false,
-        id: id
     };
 };
 
@@ -155,7 +151,7 @@ var Dawg = function () {
 
         this._count = 0;
         this._id = 0;
-        this._root = createEmptyNode(this._id++);
+        this._root = this._newNode();
 
         this._previous = "";
         this._uncheckedNodes = [];
@@ -233,7 +229,7 @@ var Dawg = function () {
                 for (var _iterator4 = slice.call(path, commonPrefix)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                     var letter = _step4.value;
 
-                    var nextNode = createEmptyNode(this._id++);
+                    var nextNode = this._newNode();
                     node.edges.set(letter, nextNode);
                     this._uncheckedNodes.push([node, letter, nextNode]);
                     node = nextNode;
@@ -358,8 +354,6 @@ var Dawg = function () {
     }, {
         key: 'match',
         value: function match(path) {
-            var joiner = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-
             return slice.call(path, 0, this.longest(path)).join('');
         }
 
@@ -384,15 +378,13 @@ var Dawg = function () {
         /**
          * Get an iterator to all paths in the dawg.
          * 
-         * Yields arrays of raw path elements, not the joined strings.
+         * Yields arrays of raw path elements, not joined strings like `values` does.
          */
 
     }, {
         key: 'paths',
         value: function paths() {
-            return new Iterator(this._root, [], function (acc, current) {
-                return acc.concat(current);
-            });
+            return new Iterator(this._root, [], concat);
         }
 
         /**
@@ -429,6 +421,15 @@ var Dawg = function () {
 
             var joinFn = join(joiner);
             return new Iterator(root, slice.call(path, 0, index).reduce(joinFn, null), joinFn);
+        }
+    }, {
+        key: '_newNode',
+        value: function _newNode() {
+            return {
+                edges: new Map(),
+                final: false,
+                id: this._id++
+            };
         }
     }, {
         key: '_minimize',
