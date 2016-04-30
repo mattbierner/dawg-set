@@ -1,0 +1,29 @@
+{
+  "name": "dawg-set",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dawg.js",
+  "scripts": {
+    "test": "mocha tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattbierner/dawg-set.git"
+  },
+  "keywords": [],
+  "author": "Matt Bierner (http://mattbierner.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mattbierner/dawg-set/issues"
+  },
+  "homepage": "https://github.com/mattbierner/dawg-set#readme",
+  "devDependencies": {
+        "babel-preset-es2015": "^6.3.0",
+        "gulp": "^3.9.0",
+        "gulp-babel": "^6.1.0",
+        "gulp-plumber": "^1.0.0",
+        "gulp-sourcemaps": "^1.6.0",
+        "chai": "*",
+        "mocha": "*"
+    }
+}
