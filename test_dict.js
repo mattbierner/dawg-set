@@ -16,11 +16,17 @@ const build = (file, k) => {
         .on('close', () => {
             words.sort()
             const dawg = Dawg.from(words);
-            
             words.forEach(x => {
                 assert.ok(dawg.has(x), x);
             });
-            console.log(dawg.count())
+            console.log(dawg.count());
+            
+            const values = new Set(dawg.values());
+            const wordSet = new Set(words);
+            for (let x of values) {
+                if (!wordSet.has(x))
+                    console.log(x)
+            }console.log(values);
             k(dawg);
         });
 };
@@ -32,5 +38,4 @@ var DICTIONARY = "/usr/share/dict/words"
 build(DICTIONARY, (data) => {
     console.log(data.has('aa'))
     console.log(data.has('abave'));
-   // fs.writeFileSync('out.json', JSON.stringify(data, null, 4));
 });

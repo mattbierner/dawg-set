@@ -1,5 +1,5 @@
 /**
- * 
+ * https://gist.github.com/smhanov/94230b422c2100ae4218
  */
 "use strict";
 
@@ -7,9 +7,9 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -17,39 +17,98 @@ var slice = Array.prototype.slice;
 
 var createEmptyNode = function createEmptyNode(id) {
     return {
-        edges: {},
+        edges: new Map(),
         final: false,
         id: id
     };
 };
 
+/* Traversal
+ ******************************************************************************/
+var DONE = { done: true };
+
+var Iterator = function Iterator(root) {
+    // Linked list stack of visits
+    this.stack = { node: root, value: '', rest: null };
+};
+
+Iterator.prototype.next = function () {
+    while (this.stack) {
+        var head = this.stack;
+        // replace head of stack with visits to child edges of head node, then
+        // remove head.
+        var r = head;
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = head.node.edges[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var _step$value = _slicedToArray(_step.value, 2);
+
+                var edge = _step$value[0];
+                var value = _step$value[1];
+
+                r = r.rest = { node: value, value: head.value + edge, rest: r.rest };
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+
+        this.stack = this.stack.rest;
+
+        if (head.node.final) return head;
+    }
+    return DONE;
+};
+
+Iterator.prototype[Symbol.iterator] = function () {
+    return this;
+};
+
+/* 
+ ******************************************************************************/
 var lexicographicalCompare = function lexicographicalCompare(a, b) {
     return a.localeCompare(b);
 };
 
 var encode = function encode(node) {
     var s = +node.final;
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
 
     try {
-        for (var _iterator = Object.keys(node.edges)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var k = _step.value;
+        for (var _iterator2 = node.edges[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var _step2$value = _slicedToArray(_step2.value, 2);
 
-            s += "_" + k + "_" + node.edges[k].id;
+            var k = _step2$value[0];
+            var v = _step2$value[1];
+
+            s += '_' + k + '_' + v.id;
         }
     } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
             }
         } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
+            if (_didIteratorError2) {
+                throw _iteratorError2;
             }
         }
     }
@@ -91,30 +150,30 @@ var Dawg = function () {
 
         this._previous = "";
         this._uncheckedNodes = [];
-        this._minimizedNodes = new Map();
+        this._minimizedNodes = {};
 
         if (paths) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
 
             try {
-                for (var _iterator2 = paths[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var _p = _step2.value;
+                for (var _iterator3 = paths[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var _p = _step3.value;
 
                     this.add(_p);
                 }
             } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
                     }
                 } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
                     }
                 }
             }
@@ -132,7 +191,7 @@ var Dawg = function () {
 
 
     _createClass(Dawg, [{
-        key: "add",
+        key: 'add',
         value: function add(path) {
             if (this._finalized) throw "Dawg finalized, cannot insert new entries";
 
@@ -147,58 +206,18 @@ var Dawg = function () {
 
             var node = this._uncheckedNodes.length === 0 ? this._root : this._uncheckedNodes[this._uncheckedNodes.length - 1][2];
 
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
-
-            try {
-                for (var _iterator3 = slice.call(path, commonPrefix)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var letter = _step3.value;
-
-                    var nextNode = createEmptyNode(this._id++);
-                    node.edges[letter] = nextNode;
-                    this._uncheckedNodes.push([node, letter, nextNode]);
-                    node = nextNode;
-                }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-
-            node.final = true;
-            this._previous = path;
-            ++this._count;
-            return this;
-        }
-
-        /**
-         * Does an entry for `path` exists in the DAWG?
-         */
-
-    }, {
-        key: "has",
-        value: function has(path) {
-            var node = this._root;
             var _iteratorNormalCompletion4 = true;
             var _didIteratorError4 = false;
             var _iteratorError4 = undefined;
 
             try {
-                for (var _iterator4 = path[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var x = _step4.value;
+                for (var _iterator4 = slice.call(path, commonPrefix)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var letter = _step4.value;
 
-                    node = node.edges[x];
-                    if (!node) return false;
+                    var nextNode = createEmptyNode(this._id++);
+                    node.edges.set(letter, nextNode);
+                    this._uncheckedNodes.push([node, letter, nextNode]);
+                    node = nextNode;
                 }
             } catch (err) {
                 _didIteratorError4 = true;
@@ -215,6 +234,46 @@ var Dawg = function () {
                 }
             }
 
+            node.final = true;
+            this._previous = path;
+            ++this._count;
+            return this;
+        }
+
+        /**
+         * Does an entry for `path` exists in the DAWG?
+         */
+
+    }, {
+        key: 'has',
+        value: function has(path) {
+            var node = this._root;
+            var _iteratorNormalCompletion5 = true;
+            var _didIteratorError5 = false;
+            var _iteratorError5 = undefined;
+
+            try {
+                for (var _iterator5 = path[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                    var x = _step5.value;
+
+                    node = node.edges.get(x);
+                    if (!node) return false;
+                }
+            } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                        _iterator5.return();
+                    }
+                } finally {
+                    if (_didIteratorError5) {
+                        throw _iteratorError5;
+                    }
+                }
+            }
+
             return node.final;
         }
 
@@ -223,7 +282,7 @@ var Dawg = function () {
          */
 
     }, {
-        key: "count",
+        key: 'count',
         value: function count() {
             return this._count;
         }
@@ -235,7 +294,7 @@ var Dawg = function () {
          */
 
     }, {
-        key: "finalize",
+        key: 'finalize',
         value: function finalize() {
             if (!this._finalized) {
                 this._minimize(0);
@@ -245,8 +304,18 @@ var Dawg = function () {
             }
             return this;
         }
+
+        /**
+         * 
+         */
+
     }, {
-        key: "_minimize",
+        key: 'values',
+        value: function values() {
+            return new Iterator(this._root);
+        }
+    }, {
+        key: '_minimize',
         value: function _minimize(downTo) {
             for (var i = 0, len = this._uncheckedNodes.length - downTo; i < len; ++i) {
                 var _uncheckedNodes$pop = this._uncheckedNodes.pop();
@@ -258,11 +327,11 @@ var Dawg = function () {
                 var child = _uncheckedNodes$pop2[2];
 
                 var key = encode(child);
-                var existing = this._minimizedNodes.get(key);
+                var existing = this._minimizedNodes[key];
                 if (existing) {
-                    parent.edges[letter] = existing;
+                    parent.edges.set(letter, existing);
                 } else {
-                    this._minimizedNodes.set(key, child);
+                    this._minimizedNodes[key] = child;
                 }
             }
         }

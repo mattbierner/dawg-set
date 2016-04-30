@@ -71,6 +71,29 @@ describe('count', () => {
 
         assert.strictEqual(words.length, d.count());
     });
+    
+     it('Multi insert with prefix/suffix should insert all entries', () => {
+        const words = [];
+        let prefix = [];
+        let suffix = [];
+        for (var i = 'a'.charCodeAt(0); i <= 'z'.charCodeAt(0); ++i) {
+            const char = String.fromCharCode(i);
+            prefix = prefix.concat(char);
+            suffix = [char].concat(suffix);
+            words.push(prefix);
+            if (suffix.length > 1)
+                words.push(suffix);
+        }
+        words.sort();
+
+        const d = Dawg.from(words);
+
+        words.forEach(x => {
+            assert.strictEqual(true, d.has(x));
+        });
+
+        assert.strictEqual(words.length, d.count());
+    });
 
     it('aa', () => {
         const d = Dawg.from(['ab', 'ba']);
