@@ -2,15 +2,22 @@
 const Dawg = require('../dawg').default;
 const assert = require('chai').assert;
 
-describe('count', () => {
-    it('Empty DAWG should match nothing no entries', () => {
-        assert.deepEqual([], Dawg.from([]).match('a'));
-        assert.deepEqual([], Dawg.from([]).match(''));
+describe('match', () => {
+    it('Empty DAWG should match nothing', () => {
+        assert.deepEqual('', Dawg.from([]).match('a'));
+        assert.deepEqual('', Dawg.from([]).match(''));
+        assert.deepEqual('', Dawg.from([]).match([]));
+    });
+    
+    it('should match nothing for value not in DAWG', () => {
+        const d = Dawg.from(['a', 'abc', 'bc']);
+        assert.deepEqual('', Dawg.from([]).match('ab'));
+        assert.deepEqual('', Dawg.from([]).match('x'));
+        assert.deepEqual('', Dawg.from([]).match('bx'));
     });
     
     it('should match longest final entry', () => {
-        assert.deepEqual([], Dawg.from(['abc', 'abcd', 'abcdef']).match('abcdex'));
-        assert.deepEqual([], Dawg.from([]).match(''));
+        assert.deepEqual('abcd', Dawg.from(['abc', 'abcd', 'abcdef']).match('abcdex'));
     });
 });
 

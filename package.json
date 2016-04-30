@@ -1,7 +1,7 @@
 {
   "name": "dawg-set",
   "version": "0.0.0",
-  "description": "",
+  "description": "Javascript directed acyclic word graph (DAWG)",
   "main": "dawg.js",
   "scripts": {
     "test": "mocha tests"
@@ -10,7 +10,14 @@
     "type": "git",
     "url": "git+https://github.com/mattbierner/dawg-set.git"
   },
-  "keywords": [],
+  "keywords": [
+      "directed acyclic word graph",
+      "dawg",
+      "string storage",
+      "trie",
+      "data structure",
+      "set"
+  ],
   "author": "Matt Bierner (http://mattbierner.com/)",
   "license": "MIT",
   "bugs": {

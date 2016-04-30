@@ -1,5 +1,7 @@
 /**
- * https://gist.github.com/smhanov/94230b422c2100ae4218
+ * Directed Acyclic Word Graph (DAWG)
+ * 
+ * Based on https://gist.github.com/smhanov/94230b422c2100ae4218
  */
 "use strict";
 
@@ -15,6 +17,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var slice = Array.prototype.slice;
 
+var join = function join(joiner) {
+    return typeof joiner === 'function' ? joiner : function (acc, current) {
+        return (acc === null ? '' : acc + joiner) + current;
+    };
+};
+
 var createEmptyNode = function createEmptyNode(id) {
     return {
         edges: new Map(),
@@ -29,14 +37,14 @@ var DONE = { done: true };
 
 var Iterator = function Iterator(root, initial, join) {
     // Linked list stack of nodes to visit.
-    this.stack = { node: root, value: initial, rest: null };
+    this.stack = root && { node: root, value: initial, rest: null };
     this.join = join;
 };
 
 Iterator.prototype.next = function () {
     while (this.stack) {
         var head = this.stack;
-        // replace head of stack with visits to child edges of head node, then
+        // Replace head of stack with visits to child edges of head node, then
         // remove head.
         var r = head;
         var _iteratorNormalCompletion = true;
@@ -78,7 +86,7 @@ Iterator.prototype[Symbol.iterator] = function () {
     return this;
 };
 
-/* 
+/* Dawg
  ******************************************************************************/
 var lexicographicalCompare = function lexicographicalCompare(a, b) {
     return a.localeCompare(b);
@@ -97,7 +105,7 @@ var encode = function encode(node) {
             var k = _step2$value[0];
             var v = _step2$value[1];
 
-            s += "_" + k + "_" + v.id;
+            s += '_' + k + '_' + v.id;
         }
     } catch (err) {
         _didIteratorError2 = true;
@@ -187,7 +195,7 @@ var Dawg = function () {
 
 
     _createClass(Dawg, [{
-        key: "count",
+        key: 'count',
         value: function count() {
             return this._count;
         }
@@ -202,12 +210,12 @@ var Dawg = function () {
          */
 
     }, {
-        key: "add",
+        key: 'add',
         value: function add(path) {
-            if (this._finalized) throw "Dawg finalized, cannot insert new entries";
+            if (this._finalized) throw new Error("Dawg finalized, cannot insert new entries");
 
             var order = this._options.compare(path, this._previous);
-            if (order < 0) throw "Paths must be inserted in lexograpic order";
+            if (order < 0) throw new Error("Paths must be inserted in lexograpic order");
             if (order === 0) return this;
 
             var commonPrefix = 0;
@@ -250,29 +258,63 @@ var Dawg = function () {
             ++this._count;
             return this;
         }
+    }, {
+        key: '_findNode',
+        value: function _findNode(path) {
+            var node = this._root;
+            var i = 0;
+            var _iteratorNormalCompletion5 = true;
+            var _didIteratorError5 = false;
+            var _iteratorError5 = undefined;
+
+            try {
+                for (var _iterator5 = path[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                    var x = _step5.value;
+
+                    if (!node) return [null, 0];
+                    node = node.edges.get(x);
+                    ++i;
+                }
+            } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                        _iterator5.return();
+                    }
+                } finally {
+                    if (_didIteratorError5) {
+                        throw _iteratorError5;
+                    }
+                }
+            }
+
+            return [node, i];
+        }
 
         /**
-         * Find the length of the longest match of `path` in the dawg.
+         * Find the length of the longest match for `path` in the dawg.
          *
-         * Returns a number in `[0, path.length]` indicating the longest match.
+         * @returns a number in `[0, path.length]` indicating the longest match.
          * 
          * @see match For actually getting the longest match
          */
 
     }, {
-        key: "longest",
+        key: 'longest',
         value: function longest(path) {
             var best = 0;
             var node = this._root;
             if (node) {
                 var i = 0;
-                var _iteratorNormalCompletion5 = true;
-                var _didIteratorError5 = false;
-                var _iteratorError5 = undefined;
+                var _iteratorNormalCompletion6 = true;
+                var _didIteratorError6 = false;
+                var _iteratorError6 = undefined;
 
                 try {
-                    for (var _iterator5 = path[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                        var x = _step5.value;
+                    for (var _iterator6 = path[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                        var x = _step6.value;
 
                         node = node.edges.get(x);
                         if (!node) break;
@@ -280,16 +322,16 @@ var Dawg = function () {
                         if (node.final) best = i;
                     }
                 } catch (err) {
-                    _didIteratorError5 = true;
-                    _iteratorError5 = err;
+                    _didIteratorError6 = true;
+                    _iteratorError6 = err;
                 } finally {
                     try {
-                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                            _iterator5.return();
+                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                            _iterator6.return();
                         }
                     } finally {
-                        if (_didIteratorError5) {
-                            throw _iteratorError5;
+                        if (_didIteratorError6) {
+                            throw _iteratorError6;
                         }
                     }
                 }
@@ -302,7 +344,7 @@ var Dawg = function () {
          */
 
     }, {
-        key: "has",
+        key: 'has',
         value: function has(path) {
             return this.longest(path) === path.length;
         }
@@ -314,9 +356,11 @@ var Dawg = function () {
          */
 
     }, {
-        key: "match",
+        key: 'match',
         value: function match(path) {
-            return slice.call(path, 0, this.longest(path));
+            var joiner = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+            return slice.call(path, 0, this.longest(path)).join('');
         }
 
         /**
@@ -326,7 +370,7 @@ var Dawg = function () {
          */
 
     }, {
-        key: "finalize",
+        key: 'finalize',
         value: function finalize() {
             if (!this._finalized) {
                 this._minimize(0);
@@ -340,13 +384,11 @@ var Dawg = function () {
         /**
          * Get an iterator to all paths in the dawg.
          * 
-         * This returns arrays of raw path elements, not the joined strings. 
-         * This means that a dawg with a string path will return individual characters,
-         * while a dawg with a array base path will return array elements.
+         * Yields arrays of raw path elements, not the joined strings.
          */
 
     }, {
-        key: "paths",
+        key: 'paths',
         value: function paths() {
             return new Iterator(this._root, [], function (acc, current) {
                 return acc.concat(current);
@@ -356,23 +398,40 @@ var Dawg = function () {
         /**
          * Get an iterator to all values in the dawg.
          * 
-         * @param joiner String or function used to join values together.
-         *  
-         * Note that this converts all strings 
+         * @param joiner String or function used to join paths together into strings.
          */
 
     }, {
-        key: "values",
+        key: 'values',
         value: function values() {
             var joiner = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
 
-            var joinFn = typeof joiner === 'function' ? joiner : function (acc, current) {
-                return (acc === null ? '' : acc + joiner) + current;
-            };
-            return new Iterator(this._root, null, joinFn);
+            return new Iterator(this._root, null, join(joiner));
+        }
+
+        /**
+         * Get an iterator to all values starting with `path` in the dawg.
+         * 
+         * @see values
+         */
+
+    }, {
+        key: 'valuesStartingWith',
+        value: function valuesStartingWith(path) {
+            var joiner = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+            var _findNode2 = this._findNode(path);
+
+            var _findNode3 = _slicedToArray(_findNode2, 2);
+
+            var root = _findNode3[0];
+            var index = _findNode3[1];
+
+            var joinFn = join(joiner);
+            return new Iterator(root, slice.call(path, 0, index).reduce(joinFn, null), joinFn);
         }
     }, {
-        key: "_minimize",
+        key: '_minimize',
         value: function _minimize(downTo) {
             for (var i = 0, len = this._uncheckedNodes.length - downTo; i < len; ++i) {
                 var _uncheckedNodes$pop = this._uncheckedNodes.pop();
